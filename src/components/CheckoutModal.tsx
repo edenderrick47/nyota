@@ -31,7 +31,20 @@ export default function CheckoutModal({ option, phoneNumber, onClose, onSuccess 
       console.log('STK Response:', response.data);
       onSuccess();
     } catch (err: any) {
-      setError(err.response?.data?.details || 'Failed to initiate payment. Check your credentials.');
+      console.error('Checkout error:', err.response?.data || err.message);
+      const errorData = err.response?.data?.details || err.response?.data || err.message;
+      const friendlyMessage = err.response?.data?.message;
+      
+      let message = friendlyMessage || 'Failed to initiate payment. Check your credentials.';
+      if (!friendlyMessage) {
+        if (typeof errorData === 'object' && errorData !== null) {
+          message = errorData.errorMessage || errorData.Description || JSON.stringify(errorData);
+        } else if (typeof errorData === 'string') {
+          message = errorData;
+        }
+      }
+      
+      setError(message);
     } finally {
       setLoading(false);
     }
